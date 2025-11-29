@@ -53,7 +53,14 @@ header {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
     border: 1px solid #333;
     margin-bottom: 30px;
+    overflow: hidden;
     position: relative;
+}
+
+#world {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+    width: 200%;
 }
 
 .row {
@@ -68,9 +75,11 @@ header {
     background: #25252b;
     border: 2px solid #4a4a55;
     border-radius: 8px;
+
     display: flex;
     justify-content: center;
     align-items: center;
+    
     font-family: "Space Mono", monospace;
     font-weight: bold;
     font-size: 1.4rem;
@@ -88,7 +97,7 @@ header {
 }
 
 .key.player {
-    background: var(--player-color);
+    background: var(--player-color) !important;
     color: white;
     border-color: white;
     box-shadow: 0 0 20px var(--player-color);
@@ -110,9 +119,20 @@ header {
 }
 
 .key.enemy::after {
-    content: "👾";
     font-size: 1.5rem;
     position: absolute;
+}
+
+.key.enemy.chaser::after {
+    content: "👾";
+}
+
+.key.enemy.random::after {
+    content: "👻";
+}
+
+.key.enemy.timed::after {
+    content: "🦇";
 }
 
 .key.target {
@@ -120,6 +140,18 @@ header {
     color: var(--target-color);
     box-shadow: inset 0 0 15px rgba(0, 255, 102, 0.4);
     background: #1a2a20;
+}
+
+.key.target.available {
+    border-color: var(--target-color);
+    color: var(--target-color);
+    background: color-mix(in srgb, var(--target-color), transparent 50%);
+    box-shadow: inset 0 0 15px rgba(0, 255, 102, 0.6);
+}
+
+.key.target.player {
+    border-color: var(--target-color);
+    background: var(--target-color) !important;
 }
 
 .key.blocked {
@@ -132,6 +164,12 @@ header {
 .key.visited {
     border-color: var(--player-color);
     color: var(--player-color);
+}
+
+.key.available {
+    border-color: #888;
+    color: #ddd;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
 }
 
 #hint {
@@ -196,9 +234,42 @@ header {
     color: red !important;
 }
 
-.key.available {
-    border-color: #888;
-    color: #ddd;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
-
+.region {
+    width: 50%;
+    position: relative;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
 }
+
+.region:first-child {
+    align-items: start;
+}
+
+.key.space-split {
+    width: 500px;
+}
+
+.region:first-child .key.space-split {
+    border-right: none;
+}
+
+.region:last-child .key.space-split {
+    border-left: none;
+}
+
+/*
+.region:first-child .key.space-split:after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(16, 16, 21, 1));
+  pointer-events: none;
+}
+*/
