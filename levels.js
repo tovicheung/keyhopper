@@ -31,7 +31,6 @@ const LEVELS = [
         targetKey: "Enter",
         blockedKeys: ["T", "Y", "G", "H", "B", "N"],
         enemies: [],
-        message: "REACH ↵"
     },
     {
         id: 3,
@@ -42,7 +41,7 @@ const LEVELS = [
             { id: "e1", startKey: "Q", type: "chaser" },
             { id: "e2", startKey: "P", type: "chaser" },
         ],
-        message: "AVOID 👾; REACH ↵"
+        message: "AVOID 👾"
     },
     {
         id: 4,
@@ -89,7 +88,7 @@ const LEVELS = [
         targetKey: "Enter",
         blockedKeys: [],
         enemies: [],
-        message: "PRESS SPACE TO COLLECT",
+        message: "COLLECT",
         collect: [
             "W", "O", "R", "L", "D"
         ]
@@ -102,9 +101,32 @@ const LEVELS = [
         enemies: [
             { id: "e1", startKey: "E", type: "chaser" }
         ],
-        message: "PRESS SPACE TO COLLECT",
+        message: "CAREFUL!",
         collect: [
             "W", "O", "N", "D", "E", "R", "F", "U", "L",
         ]
     },
+    {
+        id: 9, // E W Q Caps Tab ` Tab Caps Shift ...
+        startKey: "R",
+        targetKey: "Enter",
+        blockedKeys: [],
+        enemies: [
+            { id: "e1", startKey: "T", type: "chaser" },
+            { id: "e1", startKey: "F", type: "chaser" },
+        ],
+    },
+    {
+        id: 10,
+        startKey: "I",
+        targetKey: "Tab",
+        blockedKeys: ["T", "G", "R"],
+        enemies: [
+            { id: "e1", startKey: "A", type: "chaser" },
+            { id: "e1", startKey: "Q", type: "chaser" },
+            { id: "e1", startKey: "1", type: "chaser" },
+        ],
+    },
+
+    // TODO: wordle
 ];

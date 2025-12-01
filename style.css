@@ -113,7 +113,7 @@ header {
 
 .key.enemy {
     background: var(--enemy-color);
-    border-color: #ffaa00;
+    border-color: #ffaa00 !important;
     box-shadow: 0 0 15px var(--enemy-color);
     z-index: 9;
 }

@@ -164,6 +164,7 @@ class Game {
         this.isPlayerTurn = true;
         this.currentRegion = 0; // default left region
         this.collected.clear();
+        this.enemyTurn = true;
 
         this.msgDisplay.innerText = level.message ?? "";
         this.levelDisplay.innerText = `LEVEL ${level.id}`;
@@ -253,6 +254,7 @@ class Game {
 
     handleInput(e) {
         if (this.gameOver || !this.isPlayerTurn) return;
+        if (e.ctrlKey || e.altKey || e.metaKey) return;
         let k = e.key.toUpperCase();
         if (e.code === "Space") k = "Space";
         if (e.key === "Enter") k = "Enter";
@@ -278,8 +280,6 @@ class Game {
         //     }
         // }
 
-        if (!this.keys.has(k)) return;
-
         this.tryMove(k);
     }
 
@@ -292,6 +292,8 @@ class Game {
     }
 
     tryMove(target) {
+        if ((!this.keys.has(target)) && !(this.level.layout === "split" && target === "Space")) return;
+
         // check if blocked
         if (this.level.blockedKeys.includes(target)) {
             this.triggerShake(target);
