@@ -2,6 +2,7 @@ class Game {
     constructor() {
         this.container = document.getElementById("keyboard");
         this.levelDisplay = document.getElementById("level-display");
+        this.levelSelector = document.getElementById("level-selector");
         this.msgDisplay = document.getElementById("message-display");
 
         this.currentLevelIdx = 0;
@@ -17,7 +18,21 @@ class Game {
 
     init() {
         this.renderKB();
+        this.renderLevelSelector();
         this.loadLevel(this.currentLevelIdx);
+
+        this.levelDisplay.addEventListener("click", (e) => {
+            e.stopPropagation();
+            this.levelSelector.classList.toggle("hidden");
+        });
+
+        document.addEventListener("click", (e) => {
+            if (!this.levelSelector.classList.contains("hidden") &&
+                !this.levelSelector.contains(e.target) &&
+                e.target !== this.levelDisplay) {
+                this.levelSelector.classList.add("hidden");
+            }
+        });
 
         window.addEventListener("keydown", (e) => this.handleInput(e));
     }
@@ -114,6 +129,20 @@ class Game {
         return keyEl;
     }
 
+    renderLevelSelector() {
+        this.levelSelector.innerHTML = "";
+        LEVELS.forEach((level, i) => {
+            const btn = document.createElement("div");
+            btn.classList.add("level-btn");
+            btn.innerText = level.id;
+            btn.addEventListener("click", () => {
+                this.loadLevel(i);
+                this.levelSelector.classList.add("hidden");
+            });
+            this.levelSelector.appendChild(btn);
+        });
+    }
+
     updateWorldTransform() {
         const world = document.getElementById("world");
         if (world) {
@@ -137,6 +166,12 @@ class Game {
 
         this.msgDisplay.innerText = level.message ?? "";
         this.levelDisplay.innerText = `LEVEL ${level.id}`;
+
+        const btns = this.levelSelector.querySelectorAll(".level-btn");
+        btns.forEach((b, i) => {
+            if (i === levelIdx) b.classList.add("active");
+            else b.classList.remove("active");
+        });
 
         this.renderKB();
 
@@ -337,7 +372,7 @@ class Game {
                 if (n === "Space") return;
 
                 const d = this.getDistance(n, pos);
-                
+
                 console.log(n, d);
                 if (d < minDist) {
                     minDist = d;
@@ -432,7 +467,7 @@ class Game {
         const k1 = this.keys.get(k1Char);
         const k2 = this.keys.get(k2Char);
         if (!k1 || !k2) return 999999;
-        
+
         if (k1Char.startsWith("Space")) {
             return Math.abs(4 - k2.row);
         }
