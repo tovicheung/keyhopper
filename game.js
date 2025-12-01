@@ -8,6 +8,7 @@ class Game {
         this.currentLevelIdx = 0;
         this.playerPos = null;
         this.enemies = []; // {id, pos, type}
+        this.collected = new Set();
         this.keys = new Map();
         this.isPlayerTurn = true;
         this.gameOver = false;
@@ -152,6 +153,7 @@ class Game {
     }
 
     loadLevel(levelIdx) {
+        this.currentLevelIdx = levelIdx;
         const level = LEVELS[levelIdx];
         if (!level) return;
 
@@ -161,8 +163,7 @@ class Game {
         this.gameOver = false;
         this.isPlayerTurn = true;
         this.currentRegion = 0; // default left region
-
-        console.log(this.enemies);
+        this.collected.clear();
 
         this.msgDisplay.innerText = level.message ?? "";
         this.levelDisplay.innerText = `LEVEL ${level.id}`;
@@ -174,19 +175,7 @@ class Game {
         });
 
         this.renderKB();
-
-        // reset
-        this.keys.forEach(k => {
-            k.el.className = "key";
-            if (k.isSpace) k.el.classList.add("space-split");
-            if (level.blockedKeys.includes(k.char)) {
-                k.el.classList.add("blocked");
-            }
-        });
-
-        const target = this.keys.get(level.targetKey);
-        if (target) target.el.classList.add("target");
-
+        this.renderCollectionDisplay();
         this.startTimedEnemies();
         this.updateVisuals();
     }
@@ -212,11 +201,22 @@ class Game {
     updateVisuals() {
         this.keys.forEach(k => {
             const isSpace = k.isSpace;
-            k.el.className = "key";
+            k.el.className = "key"; // reset all classes
             if (isSpace) k.el.classList.add("space-split");
 
-            if (k.char === this.level.targetKey) k.el.classList.add("target");
+            if (k.char === this.level.targetKey) {
+                k.el.classList.add("target");
+                if (this.level.collect && this.collected.size !== this.level.collect.length) {
+                    k.el.classList.add("locked");
+                }
+            }
             if (this.level.blockedKeys.includes(k.char)) k.el.classList.add("blocked");
+
+            if (this.level.collect && this.level.collect.includes(k.char)) {
+                if (!this.collected.has(k.char)) {
+                    k.el.classList.add("collectable");
+                }
+            }
         });
 
         let pKey = this.keys.get(this.playerPos);
@@ -241,7 +241,6 @@ class Game {
                 if (k.char !== this.playerPos &&
                     !this.level.blockedKeys.includes(k.char) &&
                     this.isAdjacent(this.playerPos, k.char)) {
-
                     if (k.isSpace) {
                         if (k.region === this.currentRegion) k.el.classList.add("available");
                     } else {
@@ -270,12 +269,14 @@ class Game {
             return;
         }
 
-        if (k === "Space") {
-            if (this.isAdjacent(this.playerPos, "Space")) {
-                this.tryMove("Space");
-                return;
-            }
-        }
+        // if (k === "Space") {
+        //     if (this.level.collect && this.level.collect.includes(this.playerPos)) {
+        //         if (!this.collected.has(this.playerPos)) {
+        //             this.collectItem(this.playerPos);
+        //             return;
+        //         }
+        //     }
+        // }
 
         if (!this.keys.has(k)) return;
 
@@ -299,11 +300,25 @@ class Game {
 
         // check adjacency
         if (this.isAdjacent(this.playerPos, target)) {
+            if (target === this.level.targetKey && this.level.collect && this.collected.size < this.level.collect.length) {
+                this.triggerShake(target);
+                this.msgDisplay.innerText = "COLLECT ALL LETTERS FIRST";
+                setTimeout(() => this.msgDisplay.innerText = this.level.message, 1500);
+                return;
+            }
+
             if (this.enemies.find(c => c.pos === target)) {
                 this.triggerShake(target);
                 return;
             }
             this.playerPos = target;
+
+            if (this.level.collect && this.level.collect.includes(this.playerPos)) {
+                if (!this.collected.has(this.playerPos)) {
+                    this.collectItem(this.playerPos);
+                }
+            }
+
             this.checkWinCondition();
             this.endPlayerTurn();
         } else if (this.playerPos !== target) {
@@ -373,7 +388,6 @@ class Game {
 
                 const d = this.getDistance(n, pos);
 
-                console.log(n, d);
                 if (d < minDist) {
                     minDist = d;
                     bestMove = n;
@@ -410,11 +424,13 @@ class Game {
 
     checkWinCondition() {
         if (this.playerPos === this.level.targetKey) {
+            if (this.level.collect && this.collected.size < this.level.collect.length) {
+                return; // Should be handled in tryMove, but double check
+            }
             this.gameOver = true;
             this.msgDisplay.innerText = "LEVEL COMPLETE";
             setTimeout(() => {
-                this.currentLevelIdx++;
-                this.loadLevel(this.currentLevelIdx);
+                this.loadLevel(this.currentLevelIdx + 1);
             }, 500);
         }
     }
@@ -434,6 +450,7 @@ class Game {
 
     isAdjacent(current, target) {
         if (current === "Space" || target === "Space") {
+            if (this.level.layout !== "split") return false;
             const other = current === "Space" ? target : current;
             const otherKey = this.keys.get(other);
 
@@ -474,7 +491,6 @@ class Game {
         if (k2Char.startsWith("Space")) {
             return Math.abs(4 - k1.row);
         }
-        console.log(k1Char, k2Char);
 
         const getVisualX = (k) => {
             const rowOffsets = [0, 1.5, 1.8, 2.3, 3.5];
@@ -493,6 +509,32 @@ class Game {
             k.el.classList.add("shake");
             setTimeout(() => k.el.classList.remove("shake"), 400);
         }
+    }
+
+    renderCollectionDisplay() {
+        const display = document.getElementById("collection-display");
+        display.innerHTML = "";
+        if (!this.level.collect) {
+            display.style.display = "none";
+            return;
+        }
+        display.style.display = "";
+
+        this.level.collect.forEach(char => {
+            const span = document.createElement("span");
+            span.classList.add("collect-char");
+            span.innerText = char;
+            if (this.collected.has(char)) {
+                span.classList.add("collected");
+            }
+            display.appendChild(span);
+        });
+    }
+
+    collectItem(char) {
+        this.collected.add(char);
+        this.updateVisuals();
+        this.renderCollectionDisplay();
     }
 }
 

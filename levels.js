@@ -82,5 +82,29 @@ const LEVELS = [
                 "H", "J", "K", "L", ";", "'", "Enter",
                 "N", "M", ",", ".", "/", "ShiftRight"]
         ]
-    }
+    },
+    {
+        id: 7,
+        startKey: "A",
+        targetKey: "Enter",
+        blockedKeys: [],
+        enemies: [],
+        message: "PRESS SPACE TO COLLECT",
+        collect: [
+            "W", "O", "R", "L", "D"
+        ]
+    },
+    {
+        id: 8,
+        startKey: "A",
+        targetKey: "Enter",
+        blockedKeys: [],
+        enemies: [
+            { id: "e1", startKey: "E", type: "chaser" }
+        ],
+        message: "PRESS SPACE TO COLLECT",
+        collect: [
+            "W", "O", "N", "D", "E", "R", "F", "U", "L",
+        ]
+    },
 ];
